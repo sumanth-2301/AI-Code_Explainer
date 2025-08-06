@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Explainer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-center text-blue-700 mb-8">AI Code Explainer</h1>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Code Explanation Section -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Code Explanation</h2>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="code-input">
+                            Paste your code:
+                        </label>
+                        <textarea id="code-input" class="w-full h-64 p-3 border rounded-lg font-mono" 
+                                  placeholder="Paste your code here (Python, JavaScript, etc.)"></textarea>
+                    </div>
+                    <button id="explain-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition">
+                        Explain Code
+                    </button>
+                    <div id="explanation-output" class="mt-4 p-3 bg-gray-50 rounded-lg hidden">
+                        <h3 class="font-medium text-gray-800 mb-2">Explanation:</h3>
+                        <div id="explanation-content" class="text-gray-700 whitespace-pre-line"></div>
+                    </div>
+                </div>
+                
+                <!-- GitHub Summary Section -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">GitHub Repo Summary</h2>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="repo-url">
+                            GitHub Repository URL:
+                        </label>
+                        <input id="repo-url" type="text" class="w-full p-3 border rounded-lg"
+                               placeholder="https://github.com/username/repository">
+                    </div>
+                    <button id="summarize-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition">
+                        Summarize Repository
+                    </button>
+                    <div id="summary-output" class="mt-4 p-3 bg-gray-50 rounded-lg hidden">
+                        <h3 class="font-medium text-gray-800 mb-2">Summary:</h3>
+                        <div id="summary-content" class="text-gray-700 whitespace-pre-line"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('explain-btn').addEventListener('click', async () => {
+            const code = document.getElementById('code-input').value.trim();
+            if (!code) {
+                alert('Please enter some code to explain');
+                return;
+            }
+
+            const btn = document.getElementById('explain-btn');
+            btn.disabled = true;
+            btn.textContent = 'Explaining...';
+
+            try {
+                const response = await fetch('/explain', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    const output = document.getElementById('explanation-output');
+                    document.getElementById('explanation-content').textContent = data.explanation;
+                    output.classList.remove('hidden');
+                } else {
+                    alert(data.error || 'Failed to explain code');
+                }
+            } catch (error) {
+                alert('An error occurred while explaining the code');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Explain Code';
+            }
+        });
+
+        document.getElementById('summarize-btn').addEventListener('click', async () => {
+            const url = document.getElementById('repo-url').value.trim();
+            if (!url) {
+                alert('Please enter a GitHub repository URL');
+                return;
+            }
+
+            const btn = document.getElementById('summarize-btn');
+            btn.disabled = true;
+            btn.textContent = 'Summarizing...';
+
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ repo_url: url })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    const output = document.getElementById('summary-output');
+                    document.getElementById('summary-content').textContent = data.summary;
+                    output.classList.remove('hidden');
+                } else {
+                    alert(data.error || 'Failed to summarize repository');
+                }
+            } catch (error) {
+                alert('An error occurred while summarizing the repository');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Summarize Repository';
+            }
+        });
+    </script>
+</body>
+</html>

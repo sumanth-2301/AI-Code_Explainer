@@ -1,0 +1,15 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+textarea, input {
+    border: 1px solid #d1d5db;
+    outline: none;
+}
+
+textarea:focus, input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* Add any additional custom styles here */
